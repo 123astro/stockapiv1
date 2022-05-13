@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-
 @RestController
 @RequestMapping("/api/overview")
 public class OverViewController {
@@ -18,7 +17,6 @@ public class OverViewController {
     private Environment env;
 
     private final String BASE_URL = "https://www.alphavantage.co/query?function=OVERVIEW";
-
 
     @GetMapping("/test")
     public ResponseEntity<?> testOverview(RestTemplate restTemplate) {
