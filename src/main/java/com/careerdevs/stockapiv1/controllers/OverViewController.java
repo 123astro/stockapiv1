@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
 public class OverViewController {
 
     @Autowired
-    private Environment ev;
+    private Environment env;
 
     private final String BASE_URL = "https://www.alphavantage.co/query?function=OVERVIEW";
 
@@ -38,7 +38,7 @@ public class OverViewController {
     @GetMapping("/{symbol}")
     public ResponseEntity<?> dynamicOverview(RestTemplate restTemplate, @PathVariable String symbol ) {
         try {
-            String url = BASE_URL + "&symbol=" + symbol + "&apikey=" + ev.getProperty("AV_API_KEY");
+            String url = BASE_URL + "&symbol=" + symbol + "&apikey=" + env.getProperty("AV_API_KEY");
 
             Object response = restTemplate.getForObject(url, Object.class);
 

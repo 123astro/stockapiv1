@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class RootController {
 
     @Autowired
-    Environment ev;
+    Environment env;
 
     @GetMapping("/")
     public ResponseEntity<?> rootRoute() {
