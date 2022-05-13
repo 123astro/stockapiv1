@@ -18,6 +18,9 @@ public class RootController {
         return ResponseEntity.ok("Root Route");
     }
 
-//    @GetMapping("/apikey")
+    @GetMapping("/apikey")
+    public ResponseEntity<String> getKey() {
+        return ResponseEntity.ok(env.getProperty("AV_API_KEY"));
+    }
 
 }
