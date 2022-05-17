@@ -1,12 +1,10 @@
 package com.careerdevs.stockapiv1.controllers;
 
+import jdk.swing.interop.SwingInterOpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
@@ -18,31 +16,36 @@ public class OverViewController {
 
     private final String BASE_URL = "https://www.alphavantage.co/query?function=OVERVIEW";
 
+    // http://localhost:4000/api/overview/test
     @GetMapping("/test")
     public ResponseEntity<?> testOverview(RestTemplate restTemplate) {
         try {
             String url = BASE_URL + "&symbol=IBM&apikey=demo";
 
-            Object response = restTemplate.getForObject(url, Object.class);
+            String alphaVantageResponse = restTemplate.getForObject(url, String.class);
+           // Object response = restTemplate.getForObject(url, Object.class);
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(alphaVantageResponse);
 
         } catch (Exception e) {
+            System.out.println(e.getClass());
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
 
-
+    //   // http://localhost:4000/api/overview/{symbol}
     @GetMapping("/{symbol}")
-    public ResponseEntity<?> dynamicOverview(RestTemplate restTemplate, @PathVariable String symbol ) {
+    public ResponseEntity<?> getOverviewBySymbol(RestTemplate restTemplate, @PathVariable String symbol ) {
         try {
             String url = BASE_URL + "&symbol=" + symbol + "&apikey=" + env.getProperty("AV_API_KEY");
 
-            Object response = restTemplate.getForObject(url, Object.class);
+            String alphaVantageResponse = restTemplate.getForObject(url, String.class);
+            //Object response = restTemplate.getForObject(url, Object.class);
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(alphaVantageResponse);
 
         } catch (Exception e) {
+            System.out.println(e.getClass());
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
