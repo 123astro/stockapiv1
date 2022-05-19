@@ -10,6 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.zip.DataFormatException;
@@ -23,6 +24,7 @@ public class OverViewController {
 
     @Autowired
     private OverviewRepository overviewRepository;
+
 
     private final String BASE_URL = "https://www.alphavantage.co/query?function=OVERVIEW";
 
@@ -135,8 +137,36 @@ public class OverViewController {
     }
     //GET ALL overview from sql database
     // return [] of all overview
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAll() {
+        try {
+            Iterable<Overview> allSymbols = overviewRepository.findAll();
+            return new ResponseEntity<>(allSymbols, HttpStatus.OK);
+        } catch (Exception e) {
+            return ApiErrorHandling.genericApiError(e);
+        }
+    }
+
     //Delete ALL overview from sql database
     // return # of deletes overview
+
+    @DeleteMapping("/deleteall")
+    public ResponseEntity<?> deleteAllSymbols() {
+        try {
+
+            long totalOverview = overviewRepository.count(); // count method whole number
+            overviewRepository.deleteAll();
+
+            return new ResponseEntity<Long>(totalOverview, HttpStatus.OK);
+
+        } catch (HttpClientErrorException e) {
+            return ApiErrorHandling.customApiError(e.getMessage(), e.getStatusCode());
+
+        } catch (Exception e) {
+            return ApiErrorHandling.genericApiError(e);
+        }
+    }
 
 }
 
