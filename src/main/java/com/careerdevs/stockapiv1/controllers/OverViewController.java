@@ -34,8 +34,8 @@ public class OverViewController {
     @GetMapping("/all")
     public ResponseEntity<?> getAll() {
         try {
-            Iterable<Overview> allSymbols = overviewRepository.findAll();
-            return new ResponseEntity<>(allSymbols, HttpStatus.OK);
+            Iterable<Overview> allOverviews = overviewRepository.findAll();
+            return ResponseEntity.ok(allOverviews);
         } catch (Exception e) {
             return ApiErrorHandling.genericApiError(e);
         }
