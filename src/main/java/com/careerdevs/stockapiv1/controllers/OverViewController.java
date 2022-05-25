@@ -3,7 +3,6 @@ package com.careerdevs.stockapiv1.controllers;
 import com.careerdevs.stockapiv1.models.Overview;
 import com.careerdevs.stockapiv1.repositories.OverviewRepository;
 import com.careerdevs.stockapiv1.utils.ApiErrorHandling;
-import jdk.swing.interop.SwingInterOpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -67,7 +66,10 @@ public class OverViewController {
     @GetMapping("/{symbol}")
     public ResponseEntity<?> getOverviewBySymbol(RestTemplate restTemplate, @PathVariable String symbol) {
         try {
-            String url = BASE_URL + "&symbol=" + symbol + "&apikey=" + env.getProperty("AV_API_KEY");
+            String apiKey = env.getProperty("AV_API_KEY");
+            String url = BASE_URL + "&symbol=" + symbol + "&apikey=" + apiKey;
+
+            System.out.println(url); //test
 
             Overview alphaVantageResponse = restTemplate.getForObject(url, Overview.class);
             //Object response = restTemplate.getForObject(url, Object.class);
@@ -79,26 +81,26 @@ public class OverViewController {
                 return ApiErrorHandling.customApiError("Invalid stock symbol:" + symbol, HttpStatus.NOT_FOUND);
 
             }
-            return ResponseEntity.ok(alphaVantageResponse.toString());
+            return ResponseEntity.ok(alphaVantageResponse);
 
         } catch (Exception e) {
             return ApiErrorHandling.genericApiError(e);
         }
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<?> getOverviewById(@PathVariable("id") String id) {
         try {
             // control over error message and you get the 400. And code block is not needed.
 
-            long uID = Integer.parseInt(id);
+            long overviewID = Integer.parseInt(id);
 
-            Optional<Overview> foundUser = overviewRepository.findById(uID);
+            Optional<Overview> foundOverview = overviewRepository.findById(overviewID);
 
-            if (foundUser.isEmpty()) {
+            if (foundOverview.isEmpty()) {
                 throw new HttpClientErrorException(HttpStatus.NOT_FOUND, " User not found with ID: " + id);
             }
-            return new ResponseEntity<>(foundUser, HttpStatus.OK);
+            return new ResponseEntity<>(foundOverview, HttpStatus.OK);
 
         } catch (HttpClientErrorException e) {
             return ApiErrorHandling.customApiError(e.getMessage(), e.getStatusCode());
@@ -193,7 +195,7 @@ public class OverViewController {
         }
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/id/{id}")
     public ResponseEntity<?> deleteOverviewById(@PathVariable("id") String id, RestTemplate restTemplate
     ) {
         try {
