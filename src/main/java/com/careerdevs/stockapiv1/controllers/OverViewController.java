@@ -42,46 +42,22 @@ public class OverViewController {
     }
 
 
-    // http://localhost:4000/api/overview/test
-    @GetMapping("/test")
-    public ResponseEntity<?> testOverview(RestTemplate restTemplate) {
-        try {
-            String url = BASE_URL + "&symbol=IBM&apikey=demo";
-
-            Overview alphaVantageResponse = restTemplate.getForObject(url, Overview.class);
-            // Object response = restTemplate.getForObject(url, Object.class);
-
-            return ResponseEntity.ok(alphaVantageResponse);
-
-        } catch (IllegalArgumentException e) {
-            return ApiErrorHandling.customApiError("Error in testOverview: Check URL used for AV request",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-
-        } catch (Exception e) {
-            return ApiErrorHandling.genericApiError(e);
-        }
-    }
-
     //   // http://localhost:4000/api/overview/{symbol}
-    @GetMapping("/{symbol}")
+    @GetMapping("/symbol/{symbol}")
     public ResponseEntity<?> getOverviewBySymbol(RestTemplate restTemplate, @PathVariable String symbol) {
         try {
-            String apiKey = env.getProperty("AV_API_KEY");
-            String url = BASE_URL + "&symbol=" + symbol + "&apikey=" + apiKey;
 
-            System.out.println(url); //test
-
-            Overview alphaVantageResponse = restTemplate.getForObject(url, Overview.class);
+            Overview foundOverview = overviewRepository.findBySymbol(symbol);
             //Object response = restTemplate.getForObject(url, Object.class);
 
-            if (alphaVantageResponse == null) {
+            if (foundOverview == null) {
                 return ApiErrorHandling.customApiError("Did not receive response from AV",
                         HttpStatus.INTERNAL_SERVER_ERROR);
-            } else if (alphaVantageResponse.getSymbol() == null) {
-                return ApiErrorHandling.customApiError("Invalid stock symbol:" + symbol, HttpStatus.NOT_FOUND);
-
             }
-            return ResponseEntity.ok(alphaVantageResponse);
+            return ResponseEntity.ok(foundOverview);
+
+        } catch (HttpClientErrorException e) {
+            return ApiErrorHandling.customApiError(e.getMessage(), e.getStatusCode());
 
         } catch (Exception e) {
             return ApiErrorHandling.genericApiError(e);
@@ -109,41 +85,7 @@ public class OverViewController {
         }
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<?> testUploadOverview(RestTemplate restTemplate) {
-        try {
-            String url = BASE_URL + "&symbol=IBM&apikey=demo";
-
-            Overview alphaVantageResponse = restTemplate.getForObject(url, Overview.class);
-
-            if (alphaVantageResponse == null) {
-                return ApiErrorHandling.customApiError("Did not receive response from AV",
-                        HttpStatus.INTERNAL_SERVER_ERROR);
-
-            } else if (alphaVantageResponse.getSymbol() == null) {
-                return ApiErrorHandling.customApiError("No data retrieved from AV",
-                        HttpStatus.NOT_FOUND);
-
-            }
-
-            Overview savedOverview = overviewRepository.save(alphaVantageResponse);
-
-            return ResponseEntity.ok(savedOverview);
-
-        } catch (DataIntegrityViolationException e ){
-            return ApiErrorHandling.customApiError("Can not upload duplicate Stock data",
-                    HttpStatus.BAD_REQUEST);
-
-        } catch (IllegalArgumentException e) {
-            return ApiErrorHandling.customApiError("Error in testOverview: Check URL used for AV request",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-
-        } catch (Exception e) {
-            return ApiErrorHandling.genericApiError(e);
-        }
-    }
-
-    @PostMapping("/{symbol}")
+    @PostMapping("/symbol/{symbol}")
     public ResponseEntity<?> uploadOverviewBySymbol(RestTemplate restTemplate, @PathVariable String symbol) {
         try {
 
@@ -165,9 +107,9 @@ public class OverViewController {
 
             return ResponseEntity.ok(savedOverview);
 
-        } catch (DataIntegrityViolationException e ){
-                return ApiErrorHandling.customApiError("Can not upload duplicate Stock data",
-                        HttpStatus.BAD_REQUEST);
+        } catch (DataIntegrityViolationException e) {
+            return ApiErrorHandling.customApiError("Can not upload duplicate Stock data",
+                    HttpStatus.BAD_REQUEST);
 
         } catch (Exception e) {
             return ApiErrorHandling.genericApiError(e);
