@@ -34,6 +34,10 @@ public class OverViewController {
         try {
             Iterable<Overview> allOverviews = overviewRepository.findAll();
             return ResponseEntity.ok(allOverviews);
+
+        } catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
+
         } catch (Exception e) {
             return ApiError.genericApiError(e);
         }
@@ -45,15 +49,19 @@ public class OverViewController {
     public ResponseEntity<?> getOverviewBySymbol(RestTemplate restTemplate, @PathVariable String symbol) {
         try {
 
-            Overview foundOverview = overviewRepository.findBySymbol(symbol);
+            Overview alphaVantageResponse = overviewRepository.findBySymbol(symbol);
             //Object response = restTemplate.getForObject(url, Object.class);
 
-            if (foundOverview == null) {
-                return ApiError.customApiError("Did not receive response from AV",
-                        500);
+            if (alphaVantageResponse == null) {
+                ApiError.throwErr(500, "Did not receive response from AV");
+            } else if (alphaVantageResponse.getSymbol() == null) {
+                ApiError.throwErr(500, "Invalid stock Symbol");
             }
-            return ResponseEntity.ok(foundOverview);
 
+            return ResponseEntity.ok(alphaVantageResponse);
+
+        } catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
 
         } catch (Exception e) {
             return ApiError.genericApiError(e);
@@ -68,13 +76,17 @@ public class OverViewController {
             // long overviewID = Integer.parseInt(id);
             Optional<Overview> foundOverview = overviewRepository.findById(Long.parseLong(id));
             if (foundOverview.isEmpty()) {
-                return ApiError.customApiError(id + "Did not match any overview", 404);
+                ApiError.throwErr(404, id + " did not match any overview");
             }
 
             return ResponseEntity.ok(foundOverview);
 
+        } catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
+
         } catch (NumberFormatException e) {
             return ApiError.customApiError("Invalid id: MUST BE A NUMBER", 404);
+
         } catch (Exception e) {
             return ApiError.genericApiError(e);
         }
@@ -95,8 +107,7 @@ public class OverViewController {
 //                return ApiError.customApiError("Did not receive response from AV",
 //                        500);
             } else if (alphaVantageResponse.getSymbol() == null) {
-                return ApiError.customApiError("Invalid stock symbol:" + symbol, 404);
-
+                ApiError.throwErr(404,"Invalid stock symbol:" + symbol );
             }
 
             Overview savedOverview = overviewRepository.save(alphaVantageResponse);
@@ -131,6 +142,9 @@ public class OverViewController {
 
             return ResponseEntity.ok(AllOverviewCount);
 
+        } catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
+
         } catch (Exception e) {
             return ApiError.genericApiError(e);
         }
@@ -155,8 +169,12 @@ public class OverViewController {
 
             return ResponseEntity.ok(foundOverview);
 
+        } catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
+
         } catch (NumberFormatException e) {
             return ApiError.customApiError("Id must be a number" + id, 400);
+
         } catch (Exception e) {
             return ApiError.genericApiError(e);
         }
