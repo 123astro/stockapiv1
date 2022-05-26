@@ -72,7 +72,6 @@ public class OverViewController {
     public ResponseEntity<?> getOverviewById(@PathVariable("id") String id) {
         try {
             // control over error message and you get the 400. And code block is not needed.
-
             // long overviewID = Integer.parseInt(id);
             Optional<Overview> foundOverview = overviewRepository.findById(Long.parseLong(id));
             if (foundOverview.isEmpty()) {
