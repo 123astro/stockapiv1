@@ -2,18 +2,16 @@ package com.careerdevs.stockapiv1.controllers;
 
 import com.careerdevs.stockapiv1.models.Overview;
 import com.careerdevs.stockapiv1.repositories.OverviewRepository;
-import com.careerdevs.stockapiv1.utils.ApiErrorHandling;
+import com.careerdevs.stockapiv1.utils.ApiError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
-import java.util.zip.DataFormatException;
 
 @RestController
 @RequestMapping("/api/overview")
@@ -37,7 +35,7 @@ public class OverViewController {
             Iterable<Overview> allOverviews = overviewRepository.findAll();
             return ResponseEntity.ok(allOverviews);
         } catch (Exception e) {
-            return ApiErrorHandling.genericApiError(e);
+            return ApiError.genericApiError(e);
         }
     }
 
@@ -51,16 +49,14 @@ public class OverViewController {
             //Object response = restTemplate.getForObject(url, Object.class);
 
             if (foundOverview == null) {
-                return ApiErrorHandling.customApiError("Did not receive response from AV",
-                        HttpStatus.INTERNAL_SERVER_ERROR);
+                return ApiError.customApiError("Did not receive response from AV",
+                        500);
             }
             return ResponseEntity.ok(foundOverview);
 
-        } catch (HttpClientErrorException e) {
-            return ApiErrorHandling.customApiError(e.getMessage(), e.getStatusCode());
 
         } catch (Exception e) {
-            return ApiErrorHandling.genericApiError(e);
+            return ApiError.genericApiError(e);
         }
     }
 
@@ -69,19 +65,18 @@ public class OverViewController {
         try {
             // control over error message and you get the 400. And code block is not needed.
 
-            long overviewID = Integer.parseInt(id);
-
-            Optional<Overview> foundOverview = overviewRepository.findById(overviewID);
-
+            // long overviewID = Integer.parseInt(id);
+            Optional<Overview> foundOverview = overviewRepository.findById(Long.parseLong(id));
             if (foundOverview.isEmpty()) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, " User not found with ID: " + id);
+                return ApiError.customApiError(id + "Did not match any overview", 404);
             }
-            return new ResponseEntity<>(foundOverview, HttpStatus.OK);
 
-        } catch (HttpClientErrorException e) {
-            return ApiErrorHandling.customApiError(e.getMessage(), e.getStatusCode());
+            return ResponseEntity.ok(foundOverview);
+
+        } catch (NumberFormatException e) {
+            return ApiError.customApiError("Invalid id: MUST BE A NUMBER", 404);
         } catch (Exception e) {
-            return ApiErrorHandling.genericApiError(e);
+            return ApiError.genericApiError(e);
         }
     }
 
@@ -96,10 +91,11 @@ public class OverViewController {
             //Object response = restTemplate.getForObject(url, Object.class);
 
             if (alphaVantageResponse == null) {
-                return ApiErrorHandling.customApiError("Did not receive response from AV",
-                        HttpStatus.INTERNAL_SERVER_ERROR);
+                ApiError.throwErr(500, "Did not receive response from AV");
+//                return ApiError.customApiError("Did not receive response from AV",
+//                        500);
             } else if (alphaVantageResponse.getSymbol() == null) {
-                return ApiErrorHandling.customApiError("Invalid stock symbol:" + symbol, HttpStatus.NOT_FOUND);
+                return ApiError.customApiError("Invalid stock symbol:" + symbol, 404);
 
             }
 
@@ -107,12 +103,15 @@ public class OverViewController {
 
             return ResponseEntity.ok(savedOverview);
 
+        }catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
+
         } catch (DataIntegrityViolationException e) {
-            return ApiErrorHandling.customApiError("Can not upload duplicate Stock data",
-                    HttpStatus.BAD_REQUEST);
+            return ApiError.customApiError("Can not upload duplicate Stock data",
+                    400);
 
         } catch (Exception e) {
-            return ApiErrorHandling.genericApiError(e);
+            return ApiError.genericApiError(e);
         }
     }
 
@@ -124,16 +123,16 @@ public class OverViewController {
     public ResponseEntity<?> deleteAllSymbols() {
         try {
 
-            long totalOverview = overviewRepository.count(); // count method whole number
+            long AllOverviewCount = overviewRepository.count(); // count method whole number
+            if (AllOverviewCount == 0) {
+                return ResponseEntity.ok("No overviews to delete!");
+            }
             overviewRepository.deleteAll();
 
-            return new ResponseEntity<Long>(totalOverview, HttpStatus.OK);
-
-        } catch (HttpClientErrorException e) {
-            return ApiErrorHandling.customApiError(e.getMessage(), e.getStatusCode());
+            return ResponseEntity.ok(AllOverviewCount);
 
         } catch (Exception e) {
-            return ApiErrorHandling.genericApiError(e);
+            return ApiError.genericApiError(e);
         }
     }
 
@@ -141,25 +140,25 @@ public class OverViewController {
     public ResponseEntity<?> deleteOverviewById(@PathVariable("id") String id, RestTemplate restTemplate
     ) {
         try {
-
-            long uID = Integer.parseInt(id);
+            // Can cause NumberFormatException
+            long overviewId = Integer.parseInt(id);
 
             //check the range => other things to do
 
-            Optional<Overview> foundUser = overviewRepository.findById(uID);
+            Optional<Overview> foundOverview = overviewRepository.findById(overviewId);
 
-            if (foundUser.isEmpty()) {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, "User Not Found with ID: " + id);
+            if (foundOverview.isEmpty()) {
+                return ApiError.customApiError(id + " did not match any overview", 404);
             }
 
-            overviewRepository.deleteById(uID);
+            overviewRepository.deleteById(overviewId);
 
-            return new ResponseEntity<>(foundUser, HttpStatus.OK);
+            return ResponseEntity.ok(foundOverview);
 
-        } catch (HttpClientErrorException e) {
-            return ApiErrorHandling.customApiError(e.getMessage(), e.getStatusCode());
+        } catch (NumberFormatException e) {
+            return ApiError.customApiError("Id must be a number" + id, 400);
         } catch (Exception e) {
-            return ApiErrorHandling.genericApiError(e);
+            return ApiError.genericApiError(e);
         }
     }
 
