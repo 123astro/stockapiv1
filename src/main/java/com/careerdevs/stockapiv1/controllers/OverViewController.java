@@ -162,7 +162,7 @@ public class OverViewController {
             Optional<Overview> foundOverview = overviewRepository.findById(overviewId);
 
             if (foundOverview.isEmpty()) {
-                return ApiError.customApiError(id + " did not match any overview", 404);
+                ApiError.throwErr(404, id + " did not match any overview" );
             }
 
             overviewRepository.deleteById(overviewId);
@@ -173,7 +173,7 @@ public class OverViewController {
             return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
 
         } catch (NumberFormatException e) {
-            return ApiError.customApiError("Id must be a number" + id, 400);
+            return ApiError.customApiError("ID must be a number: " + id, 400);
 
         } catch (Exception e) {
             return ApiError.genericApiError(e);
