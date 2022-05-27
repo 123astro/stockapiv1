@@ -92,6 +92,7 @@ public class OverViewController {
     }
 
     @PostMapping("/symbol/{symbol}")
+    // restTemplate is used to make external API request or HTTP request. Rest Template => request!
     public ResponseEntity<?> uploadOverviewBySymbol(RestTemplate restTemplate, @PathVariable String symbol) {
         try {
 
