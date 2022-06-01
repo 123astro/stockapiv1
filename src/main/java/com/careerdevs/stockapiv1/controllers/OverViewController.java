@@ -26,7 +26,7 @@ public class OverViewController {
 
     private final String BASE_URL = "https://www.alphavantage.co/query?function=OVERVIEW";
 
-    //GET ALL overview from sql database
+    // GET ALL overview from sql database
     // return [] of all overview
 
     @GetMapping("/all")
@@ -45,8 +45,8 @@ public class OverViewController {
     }
 
 
-    //   // http://localhost:4000/api/overview/{symbol}
-    @GetMapping("/symbol/{symbol}")
+    // http://localhost:4000/api/overview/{symbol}
+    @GetMapping("/{symbol}")
     public ResponseEntity<?> getOverviewBySymbol(RestTemplate restTemplate, @PathVariable String symbol) {
         try {
 
@@ -92,7 +92,7 @@ public class OverViewController {
         }
     }
 
-    @PostMapping("/symbol/{symbol}")
+    @PostMapping("/{symbol}")
     // restTemplate is used to make external API request or HTTP request. Rest Template => request!
     public ResponseEntity<?> uploadOverviewBySymbol(RestTemplate restTemplate, @PathVariable String symbol) {
         try {
@@ -128,9 +128,6 @@ public class OverViewController {
         }
     }
 
-
-    //Delete ALL overview from sql database
-    // return # of deletes overview
 
     @DeleteMapping("/all")
     public ResponseEntity<?> deleteAllSymbols() {
