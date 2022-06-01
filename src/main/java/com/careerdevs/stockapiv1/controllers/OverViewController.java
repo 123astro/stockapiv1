@@ -33,6 +33,7 @@ public class OverViewController {
     public ResponseEntity<?> getAll() {
         try {
             Iterable<Overview> allOverviews = overviewRepository.findAll();
+
             return ResponseEntity.ok(allOverviews);
 
         } catch (HttpClientErrorException e) {
@@ -75,7 +76,7 @@ public class OverViewController {
             // long overviewID = Integer.parseInt(id);
             Optional<Overview> foundOverview = overviewRepository.findById(Long.parseLong(id));
             if (foundOverview.isEmpty()) {
-                ApiError.throwErr(404, id + " did not match any overview");
+                ApiError.throwErr(404, "ID: " + id + " did not match any overview.");
             }
 
             return ResponseEntity.ok(foundOverview);
@@ -84,7 +85,7 @@ public class OverViewController {
             return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
 
         } catch (NumberFormatException e) {
-            return ApiError.customApiError("Invalid id: MUST BE A NUMBER", 404);
+            return ApiError.customApiError("ID must be a number: " + id, 404);
 
         } catch (Exception e) {
             return ApiError.genericApiError(e);
@@ -107,14 +108,15 @@ public class OverViewController {
 //                return ApiError.customApiError("Did not receive response from AV",
 //                        500);
             } else if (alphaVantageResponse.getSymbol() == null) {
-                ApiError.throwErr(404,"Invalid stock symbol:" + symbol );
+                ApiError.throwErr(404, "Invalid stock symbol:" + symbol);
             }
 
-            Overview savedOverview = overviewRepository.save(alphaVantageResponse);
+            Overview savedOverview = overviewRepository.save(alphaVantageResponse); // storing AV data to MySQL
+            // database.
 
             return ResponseEntity.ok(savedOverview);
 
-        }catch (HttpClientErrorException e) {
+        } catch (HttpClientErrorException e) {
             return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
 
         } catch (DataIntegrityViolationException e) {
@@ -130,7 +132,7 @@ public class OverViewController {
     //Delete ALL overview from sql database
     // return # of deletes overview
 
-    @DeleteMapping("/deleteall")
+    @DeleteMapping("/all")
     public ResponseEntity<?> deleteAllSymbols() {
         try {
 
@@ -140,7 +142,7 @@ public class OverViewController {
             }
             overviewRepository.deleteAll();
 
-            return ResponseEntity.ok(AllOverviewCount);
+            return ResponseEntity.ok("Deleted Overviews: " + AllOverviewCount);
 
         } catch (HttpClientErrorException e) {
             return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
@@ -162,7 +164,7 @@ public class OverViewController {
             Optional<Overview> foundOverview = overviewRepository.findById(overviewId);
 
             if (foundOverview.isEmpty()) {
-                ApiError.throwErr(404, id + " did not match any overview" );
+                ApiError.throwErr(404, id + " did not match any overview");
             }
 
             overviewRepository.deleteById(overviewId);
@@ -172,7 +174,7 @@ public class OverViewController {
         } catch (HttpClientErrorException e) {
             return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
 
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException e) { //looking for a number
             return ApiError.customApiError("ID must be a number: " + id, 400);
 
         } catch (Exception e) {
