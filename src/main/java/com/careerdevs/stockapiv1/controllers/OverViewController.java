@@ -133,7 +133,6 @@ public class OverViewController {
         }
     }
 
-
     @GetMapping("/sector/{sector}")
     public ResponseEntity<?> getOverviewBySector(RestTemplate restTemplate, @PathVariable String sector) {
         try {
@@ -154,7 +153,6 @@ public class OverViewController {
             return ApiError.genericApiError(e);
         }
     }
-
 
     @GetMapping("/exchange/{exchange}")
     public ResponseEntity<?> getOverviewByExchange(RestTemplate restTemplate, @PathVariable String exchange) {
@@ -257,7 +255,6 @@ public class OverViewController {
         }
     }
 
-
     @DeleteMapping("/all")
     public ResponseEntity<?> deleteAllSymbols() {
         try {
@@ -329,7 +326,6 @@ public class OverViewController {
         }
     }
 
-
     @DeleteMapping("/country/{country}")
     public ResponseEntity<?> deleteByCountry(RestTemplate restTemplate, @PathVariable String country) {
         try {
@@ -383,6 +379,69 @@ public class OverViewController {
                 ApiError.throwErr(404, assettype + " did not match overview");
             }
             overviewRepository.deleteByAssetType(assettype);
+            return ResponseEntity.ok(foundOverview);
+
+        } catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
+
+        } catch (Exception e) {
+            return ApiError.genericApiError(e);
+        }
+    }
+
+    @DeleteMapping("/sector/{sector}")
+    public ResponseEntity<?> deleteBySector(RestTemplate restTemplate, @PathVariable String sector) {
+        try {
+
+            List<Overview> foundOverview = overviewRepository.deleteBySector(sector);
+            //Object response = restTemplate.getForObject(url, Object.class);
+
+            if (foundOverview.isEmpty()) {
+                ApiError.throwErr(404, sector + " did not match overview");
+            }
+            overviewRepository.deleteBySector(sector);
+            return ResponseEntity.ok(foundOverview);
+
+        } catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
+
+        } catch (Exception e) {
+            return ApiError.genericApiError(e);
+        }
+    }
+
+    @DeleteMapping("/symbol/{symbol}")
+    public ResponseEntity<?> deleteBySymbol(RestTemplate restTemplate, @PathVariable String symbol) {
+        try {
+
+            Optional<Overview> foundOverview = overviewRepository.deleteBySymbol(symbol);
+            //Object response = restTemplate.getForObject(url, Object.class);
+
+            if (foundOverview.isEmpty()) {
+                ApiError.throwErr(404, symbol + " did not match overview");
+            }
+            overviewRepository.deleteBySymbol(symbol);
+            return ResponseEntity.ok(foundOverview);
+
+        } catch (HttpClientErrorException e) {
+            return ApiError.customApiError(e.getMessage(), e.getStatusCode().value());
+
+        } catch (Exception e) {
+            return ApiError.genericApiError(e);
+        }
+    }
+
+    @DeleteMapping("/name/{name}")
+    public ResponseEntity<?> deleteByName(RestTemplate restTemplate, @PathVariable String name) {
+        try {
+
+            Optional<Overview> foundOverview = overviewRepository.deleteByName(name);
+            //Object response = restTemplate.getForObject(url, Object.class);
+
+            if (foundOverview.isEmpty()) {
+                ApiError.throwErr(404, name + " did not match overview");
+            }
+            overviewRepository.deleteByName(name);
             return ResponseEntity.ok(foundOverview);
 
         } catch (HttpClientErrorException e) {
