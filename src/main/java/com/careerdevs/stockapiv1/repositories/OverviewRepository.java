@@ -25,6 +25,10 @@ public interface OverviewRepository extends JpaRepository<Overview, Long> {
 
     List<Overview> findByExchange(String exchange);
 
+    List<Overview> findByMarketCapGreaterThanEqual(long marketCap);
+
+    List<Overview> findByMarketCapLessThanEqual(long marketCap);
+
     List<Overview> deleteById(long id);
 
     List<Overview> deleteBySymbol(String symbol);
@@ -40,6 +44,11 @@ public interface OverviewRepository extends JpaRepository<Overview, Long> {
     List<Overview> deleteByCountry(String country);
 
     List<Overview> deleteByExchange(String exchange);
+
+    List<Overview> deleteByMarketCapGreaterThanEqual(long marketCap);
+
+    List<Overview> deleteByMarketCapLessThanEqual(long marketCap);
+
 
 
     //jpa is creating an SQL query with findBySymbol

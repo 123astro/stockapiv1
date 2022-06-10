@@ -89,6 +89,10 @@ public class OverViewController {
                 case "currency" -> foundOverview = overviewRepository.deleteByCurrency(value);
                 case "country" -> foundOverview = overviewRepository.deleteByCountry(value);
                 case "exchange" -> foundOverview = overviewRepository.deleteByExchange(value);
+                case "marketcapgte" -> foundOverview =
+                        overviewRepository.deleteByMarketCapGreaterThanEqual(Long.parseLong(value));
+                case "marketcaplte" -> foundOverview =
+                        overviewRepository.deleteByMarketCapLessThanEqual(Long.parseLong(value));
             }
 
             if (foundOverview == null || foundOverview.isEmpty()) {
@@ -126,6 +130,10 @@ public class OverViewController {
                 case "currency" -> foundOverview = overviewRepository.findByCurrency(value);
                 case "country" -> foundOverview = overviewRepository.findByCountry(value);
                 case "exchange" -> foundOverview = overviewRepository.findByExchange(value);
+                case "marketcapgte" -> foundOverview =
+                        overviewRepository.findByMarketCapGreaterThanEqual(Long.parseLong(value));
+                case "marketcaplte" -> foundOverview =
+                        overviewRepository.findByMarketCapLessThanEqual(Long.parseLong(value));
             }
 
             if (foundOverview == null || foundOverview.isEmpty()) {
@@ -242,6 +250,11 @@ public class OverViewController {
     }
 
 }
+
+// **Industry Any piece of the industry,
+// 52week high,
+// 52week low,
+// ** dividendate  get delete by date  =>  then before and after
 
 //    @DeleteMapping("/id/{id}")
 //    public ResponseEntity<?> deleteOverviewById(@PathVariable("id") String id, RestTemplate restTemplate
